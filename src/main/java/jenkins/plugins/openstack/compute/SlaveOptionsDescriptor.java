@@ -182,11 +182,6 @@ public final class SlaveOptionsDescriptor extends hudson.model.Descriptor<SlaveO
             @QueryParameter String value,
             @RelativePath("../../slaveOptions") @QueryParameter("floatingIpPool") String def
     ) {
-        if (Util.fixEmpty(value) == null) {
-            String d = getDefault(def, opts().getFloatingIpPool());
-            if (d != null) return FormValidation.ok(def(d));
-            return REQUIRED;
-        }
         return OK;
     }
 
