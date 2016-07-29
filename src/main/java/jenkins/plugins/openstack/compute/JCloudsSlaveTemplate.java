@@ -224,10 +224,17 @@ public class JCloudsSlaveTemplate implements Describable<JCloudsSlaveTemplate>, 
 
         String az = opts.getAvailabilityZone();
         if (!Strings.isNullOrEmpty(az)) {
-            String x = az.split(",");
-            int az_idx = (int)(Math.random() * x.length + 1);
-            LOGGER.fine("Setting availabilityZone to " + x[az_idx]);
-            builder.availabilityZone(x[az_idx]);
+            // Allow for one of X azs to be given, and
+            // picking one at random from that set.
+            String[] azs = az.split(",");
+            if (azs.length > 1) {
+                az = azs[new Random().nextInt(azs.length)];
+            }
+            else {
+                az = azs[0];
+            }
+            LOGGER.fine("Setting availabilityZone to " + az);
+            builder.availabilityZone(az);
         }
 
         @CheckForNull String userDataText = getUserData();
@@ -247,8 +254,13 @@ public class JCloudsSlaveTemplate implements Describable<JCloudsSlaveTemplate>, 
         if (metadata != null){
           String[] p = metadata.split(",");
           for(Integer i = 0; i < p.length; i++){
-            String[] nv = p[i].split("=");
-            builder.addMetadataItem(nv[0], nv[1]);
+            String[] nv = p[i].split("=", 2);
+            if (nv.length == 2) {
+                builder.addMetadataItem(nv[0], nv[1]);
+            }
+            else if (nv.length == 1) {
+                builder.addMetadataItem(nv[0], "");     
+            }
           }
         }
 
